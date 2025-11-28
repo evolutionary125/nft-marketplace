@@ -113,6 +113,7 @@
             overflow: hidden;
             box-shadow: var(--shadow);
             transition: transform 0.3s;
+            position: relative;
         }
 
         .collection-card:hover, .nft-card:hover {
@@ -123,6 +124,7 @@
             width: 100%;
             height: 150px;
             object-fit: cover;
+            background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
         }
 
         .collection-info, .nft-info {
@@ -132,11 +134,18 @@
         .collection-name, .nft-name {
             font-weight: bold;
             margin-bottom: 5px;
+            font-size: 14px;
         }
 
         .collection-stats, .nft-price {
             color: #666;
-            font-size: 14px;
+            font-size: 12px;
+        }
+
+        .nft-id {
+            color: #888;
+            font-size: 11px;
+            margin-top: 2px;
         }
 
         .user-info {
@@ -261,26 +270,64 @@
             background-color: var(--card-color);
             border-radius: var(--border-radius);
             padding: 15px;
-            margin-top: 15px;
+            margin-top: 10px;
             box-shadow: var(--shadow);
+            border: 1px solid #eee;
         }
 
         .chart-image {
             width: 100%;
             border-radius: var(--border-radius);
             margin-bottom: 10px;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 12px;
         }
 
         .chart-info {
-            font-size: 14px;
+            font-size: 12px;
             color: #666;
+            line-height: 1.4;
+        }
+
+        .price-history {
+            margin-top: 10px;
+        }
+
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            margin-bottom: 4px;
+            padding: 3px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .price-date {
+            color: #888;
+        }
+
+        .price-value {
+            font-weight: bold;
+        }
+
+        .price-up {
+            color: #4CAF50;
+        }
+
+        .price-down {
+            color: #f44336;
         }
 
         .favorite-button {
             position: absolute;
             top: 10px;
             right: 10px;
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.9);
             border: none;
             border-radius: 50%;
             width: 30px;
@@ -289,7 +336,9 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
+            z-index: 2;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         .favorite-button.active {
@@ -313,6 +362,11 @@
 
         .animated-nft {
             animation: pulse 3s infinite;
+        }
+
+        .price-change {
+            font-size: 11px;
+            margin-left: 5px;
         }
 
         @media (min-width: 768px) {
@@ -370,7 +424,7 @@
             <div class="user-info">
                 <div class="info-row">
                     <span class="info-label">ID пользователя:</span>
-                    <span class="info-value" id="user-id">123456789</span>
+                    <span class="info-value" id="user-id">-</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Баланс:</span>
@@ -451,40 +505,49 @@
         tg.expand();
         tg.enableClosingConfirmation();
 
+        // Генерация случайного ID пользователя при первом запуске
+        function generateUserId() {
+            if (!localStorage.getItem('userId')) {
+                const randomId = Math.floor(100000000 + Math.random() * 900000000);
+                localStorage.setItem('userId', randomId.toString());
+            }
+            return localStorage.getItem('userId');
+        }
+
         // Данные приложения
         const collections = [
             {
                 id: 1,
-                name: "Plush Pepe",
-                image: "https://via.placeholder.com/300x200/6f42c1/ffffff?text=Plush+Pepe",
+                name: "Elon's Space Party",
+                image: "https://via.placeholder.com/300x200/6f42c1/ffffff?text=Elon's+Space+Party",
                 nftCount: 15,
                 floorPrice: "4.5 TON"
             },
             {
                 id: 2,
-                name: "Snoop Dogg",
-                image: "https://via.placeholder.com/300x200/4CAF50/ffffff?text=Snoop+Dogg",
+                name: "Cupid Charm",
+                image: "https://via.placeholder.com/300x200/4CAF50/ffffff?text=Cupid+Charm",
                 nftCount: 8,
                 floorPrice: "7.2 TON"
             },
             {
                 id: 3,
-                name: "Telegram Gifts",
-                image: "https://via.placeholder.com/300x200/2196F3/ffffff?text=Telegram+Gifts",
+                name: "Happy Brownie",
+                image: "https://via.placeholder.com/300x200/2196F3/ffffff?text=Happy+Brownie",
                 nftCount: 12,
                 floorPrice: "3.8 TON"
             },
             {
                 id: 4,
-                name: "CryptoPunks TON",
-                image: "https://via.placeholder.com/300x200/FF9800/ffffff?text=CryptoPunks+TON",
+                name: "Khabib's Papakha",
+                image: "https://via.placeholder.com/300x200/FF9800/ffffff?text=Khabib's+Papakha",
                 nftCount: 20,
                 floorPrice: "12.5 TON"
             },
             {
                 id: 5,
-                name: "TON Animals",
-                image: "https://via.placeholder.com/300x200/E91E63/ffffff?text=TON+Animals",
+                name: "Love Potion",
+                image: "https://via.placeholder.com/300x200/E91E63/ffffff?text=Love+Potion",
                 nftCount: 10,
                 floorPrice: "2.3 TON"
             },
@@ -499,61 +562,69 @@
 
         const nfts = {
             1: [
-                { id: 101, name: "Pepe #1", image: "https://via.placeholder.com/300x300/6f42c1/ffffff?text=Pepe+1", price: "4.5 TON", animated: true },
-                { id: 102, name: "Pepe #2", image: "https://via.placeholder.com/300x300/6f42c1/ffffff?text=Pepe+2", price: "5.2 TON", animated: true },
-                { id: 103, name: "Pepe #3", image: "https://via.placeholder.com/300x300/6f42c1/ffffff?text=Pepe+3", price: "3.8 TON", animated: true },
-                { id: 104, name: "Pepe #4", image: "https://via.placeholder.com/300x300/6f42c1/ffffff?text=Pepe+4", price: "6.1 TON", animated: true }
+                { id: 101, name: "Elon #3435", image: "https://via.placeholder.com/300x300/6f42c1/ffffff?text=Elon+3435", price: "634.11 TON", animated: true },
+                { id: 102, name: "Elon #2891", image: "https://via.placeholder.com/300x300/6f42c1/ffffff?text=Elon+2891", price: "421.50 TON", animated: true },
+                { id: 103, name: "Elon #1567", image: "https://via.placeholder.com/300x300/6f42c1/ffffff?text=Elon+1567", price: "789.25 TON", animated: true }
             ],
             2: [
-                { id: 201, name: "Snoop #1", image: "https://via.placeholder.com/300x300/4CAF50/ffffff?text=Snoop+1", price: "7.2 TON", animated: true },
-                { id: 202, name: "Snoop #2", image: "https://via.placeholder.com/300x300/4CAF50/ffffff?text=Snoop+2", price: "8.5 TON", animated: true },
-                { id: 203, name: "Snoop #3", image: "https://via.placeholder.com/300x300/4CAF50/ffffff?text=Snoop+3", price: "6.9 TON", animated: true }
+                { id: 201, name: "Cupid #24078", image: "https://via.placeholder.com/300x300/4CAF50/ffffff?text=Cupid+24078", price: "13.66 TON", animated: true },
+                { id: 202, name: "Cupid #19842", image: "https://via.placeholder.com/300x300/4CAF50/ffffff?text=Cupid+19842", price: "8.90 TON", animated: true }
             ],
             3: [
-                { id: 301, name: "Gift #1", image: "https://via.placeholder.com/300x300/2196F3/ffffff?text=Gift+1", price: "3.8 TON", animated: true },
-                { id: 302, name: "Gift #2", image: "https://via.placeholder.com/300x300/2196F3/ffffff?text=Gift+2", price: "4.2 TON", animated: true },
-                { id: 303, name: "Gift #3", image: "https://via.placeholder.com/300x300/2196F3/ffffff?text=Gift+3", price: "2.9 TON", animated: true },
-                { id: 304, name: "Gift #4", image: "https://via.placeholder.com/300x300/2196F3/ffffff?text=Gift+4", price: "5.1 TON", animated: true }
+                { id: 301, name: "Brownie #30856", image: "https://via.placeholder.com/300x300/2196F3/ffffff?text=Brownie+30856", price: "5.30 TON", animated: true },
+                { id: 302, name: "Brownie #27543", image: "https://via.placeholder.com/300x300/2196F3/ffffff?text=Brownie+27543", price: "7.15 TON", animated: true }
             ],
             4: [
-                { id: 401, name: "Punk #1", image: "https://via.placeholder.com/300x300/FF9800/ffffff?text=Punk+1", price: "12.5 TON", animated: true },
-                { id: 402, name: "Punk #2", image: "https://via.placeholder.com/300x300/FF9800/ffffff?text=Punk+2", price: "15.3 TON", animated: true },
-                { id: 403, name: "Punk #3", image: "https://via.placeholder.com/300x300/FF9800/ffffff?text=Punk+3", price: "10.8 TON", animated: true }
+                { id: 401, name: "Khabib #10915", image: "https://via.placeholder.com/300x300/FF9800/ffffff?text=Khabib+10915", price: "74.20 TON", animated: true },
+                { id: 402, name: "Khabib #08732", image: "https://via.placeholder.com/300x300/FF9800/ffffff?text=Khabib+08732", price: "62.80 TON", animated: true }
             ],
             5: [
-                { id: 501, name: "Animal #1", image: "https://via.placeholder.com/300x300/E91E63/ffffff?text=Animal+1", price: "2.3 TON", animated: true },
-                { id: 502, name: "Animal #2", image: "https://via.placeholder.com/300x300/E91E63/ffffff?text=Animal+2", price: "3.1 TON", animated: true },
-                { id: 503, name: "Animal #3", image: "https://via.placeholder.com/300x300/E91E63/ffffff?text=Animal+3", price: "1.9 TON", animated: true }
+                { id: 501, name: "Love #2346", image: "https://via.placeholder.com/300x300/E91E63/ffffff?text=Love+2346", price: "74.20 TON", animated: true },
+                { id: 502, name: "Love #1895", image: "https://via.placeholder.com/300x300/E91E63/ffffff?text=Love+1895", price: "81.45 TON", animated: true }
             ],
             6: [
-                { id: 601, name: "Art #1", image: "https://via.placeholder.com/300x300/009688/ffffff?text=Art+1", price: "5.7 TON", animated: true },
-                { id: 602, name: "Art #2", image: "https://via.placeholder.com/300x300/009688/ffffff?text=Art+2", price: "7.4 TON", animated: true },
-                { id: 603, name: "Art #3", image: "https://via.placeholder.com/300x300/009688/ffffff?text=Art+3", price: "4.9 TON", animated: true }
+                { id: 601, name: "Art #7821", image: "https://via.placeholder.com/300x300/009688/ffffff?text=Art+7821", price: "5.70 TON", animated: true },
+                { id: 602, name: "Art #6543", image: "https://via.placeholder.com/300x300/009688/ffffff?text=Art+6543", price: "8.25 TON", animated: true }
             ]
         };
 
-        // Графики для NFT (выдуманные данные)
-        const charts = [
-            { image: "https://via.placeholder.com/300x150/6f42c1/ffffff?text=Chart+1", info: "Цена выросла на 15% за последние 7 дней" },
-            { image: "https://via.placeholder.com/300x150/4CAF50/ffffff?text=Chart+2", info: "Стабильный рост на 5% ежедневно" },
-            { image: "https://via.placeholder.com/300x150/2196F3/ffffff?text=Chart+3", info: "Волатильность высокая, возможен скачок цены" },
-            { image: "https://via.placeholder.com/300x150/FF9800/ffffff?text=Chart+4", info: "Цена упала на 8%, но ожидается восстановление" },
-            { image: "https://via.placeholder.com/300x150/E91E63/ffffff?text=Chart+5", info: "Стабильная цена в течение месяца" },
-            { image: "https://via.placeholder.com/300x150/009688/ffffff?text=Chart+6", info: "Резкий рост на 25% после листинга на новой площадке" }
-        ];
+        // История цен для NFT (как в примере)
+        const priceHistory = {
+            101: [
+                { date: "27.06.2025 11:37", price: "1496.19", change: "+19%" },
+                { date: "28.06.2025 14:43", price: "1398.94", change: "-6.50%" },
+                { date: "29.06.2025 20:49", price: "969.46", change: "-30.70%" },
+                { date: "01.07.2025 07:56", price: "1237.04", change: "+27.60%" },
+                { date: "02.07.2025 17:07", price: "734.80", change: "-40.60%" },
+                { date: "03.07.2025 23:13", price: "1204.34", change: "+63.90%" },
+                { date: "05.07.2025 10:20", price: "741.87", change: "-38.40%" },
+                { date: "06.07.2025 20:25", price: "456.99", change: "-38.40%" },
+                { date: "08.07.2025 02:04", price: "377.02", change: "-17.50%" },
+                { date: "09.07.2025 05:06", price: "576.46", change: "+52.90%" }
+            ]
+        };
 
         // Состояние приложения
         let currentCollection = null;
         let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
         let userNFTs = JSON.parse(localStorage.getItem('userNFTs')) || [];
         let selectedCurrency = localStorage.getItem('currency') || 'TON';
+        let userBalance = localStorage.getItem('userBalance') || '0';
 
         // Инициализация приложения
         document.addEventListener('DOMContentLoaded', function() {
+            initializeUser();
             renderCollections();
             setupEventListeners();
             updateCurrencyDisplay();
         });
+
+        // Инициализация пользователя
+        function initializeUser() {
+            const userId = generateUserId();
+            document.getElementById('user-id').textContent = userId;
+            document.getElementById('user-balance').textContent = `${userBalance} ${selectedCurrency}`;
+        }
 
         // Рендер коллекций
         function renderCollections() {
@@ -564,7 +635,7 @@
                 const collectionCard = document.createElement('div');
                 collectionCard.className = 'collection-card';
                 collectionCard.innerHTML = `
-                    <img src="${collection.image}" alt="${collection.name}" class="collection-image">
+                    <img src="${collection.image}" alt="${collection.name}" class="collection-image" onerror="this.src='https://via.placeholder.com/300x200/cccccc/666666?text=NFT+Image'">
                     <div class="collection-info">
                         <div class="collection-name">${collection.name}</div>
                         <div class="collection-stats">${collection.nftCount} NFT • от ${collection.floorPrice}</div>
@@ -592,17 +663,24 @@
                 nftCard.className = 'nft-card';
                 const isFavorite = favorites.includes(nft.id);
                 const animationClass = nft.animated ? 'animated-nft' : '';
+                const nftId = nft.name.split('#')[1] || nft.id;
                 
                 nftCard.innerHTML = `
                     <button class="favorite-button ${isFavorite ? 'active' : ''}" data-nft-id="${nft.id}">♥</button>
-                    <img src="${nft.image}" alt="${nft.name}" class="nft-image ${animationClass}">
+                    <img src="${nft.image}" alt="${nft.name}" class="nft-image ${animationClass}" onerror="this.src='https://via.placeholder.com/300x300/cccccc/666666?text=NFT+Image'">
                     <div class="nft-info">
                         <div class="nft-name">${nft.name}</div>
                         <div class="nft-price">${nft.price}</div>
+                        <div class="nft-id">#${nftId}</div>
                     </div>
                     <div class="chart-container">
-                        <img src="${getRandomChart().image}" class="chart-image" alt="График цен">
-                        <div class="chart-info">${getRandomChart().info}</div>
+                        <div class="chart-image">
+                            📊 График цен
+                        </div>
+                        <div class="chart-info">
+                            ${generateChartInfo(nft.id)}
+                        </div>
+                        ${generatePriceHistory(nft.id)}
                     </div>
                 `;
                 
@@ -617,9 +695,37 @@
             });
         }
 
-        // Получить случайный график
-        function getRandomChart() {
-            return charts[Math.floor(Math.random() * charts.length)];
+        // Генерация информации о графике
+        function generateChartInfo(nftId) {
+            if (priceHistory[nftId]) {
+                const history = priceHistory[nftId];
+                const firstPrice = parseFloat(history[history.length-1].price);
+                const lastPrice = parseFloat(history[0].price);
+                const change = ((lastPrice - firstPrice) / firstPrice * 100).toFixed(1);
+                const changeSymbol = change >= 0 ? '+' : '';
+                
+                return `Колебание цен: ${changeSymbol}${change}% за период`;
+            }
+            return "Колебание цен: +5.2% за 7 дней";
+        }
+
+        // Генерация истории цен
+        function generatePriceHistory(nftId) {
+            if (priceHistory[nftId]) {
+                let html = '<div class="price-history">';
+                priceHistory[nftId].slice(0, 3).forEach(item => {
+                    const changeClass = item.change.startsWith('+') ? 'price-up' : 'price-down';
+                    html += `
+                        <div class="price-item">
+                            <span class="price-date">${item.date.split(' ')[0]}</span>
+                            <span class="price-value ${changeClass}">${item.price} ${item.change}</span>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                return html;
+            }
+            return '';
         }
 
         // Переключение избранного
@@ -633,11 +739,10 @@
             localStorage.setItem('favorites', JSON.stringify(favorites));
         }
 
-        // Показать детали NFT (в реальном приложении здесь будет модальное окно)
+        // Показать детали NFT
         function showNFTDetails(nft) {
             alert(`Детали NFT: ${nft.name}\nЦена: ${nft.price}\n\nВ реальном приложении здесь будет подробная информация о NFT и возможность покупки.`);
             
-            // В реальном приложении здесь будет логика покупки NFT
             // Для демонстрации просто добавим NFT в коллекцию пользователя
             if (!userNFTs.includes(nft.id)) {
                 userNFTs.push(nft.id);
@@ -648,10 +753,13 @@
 
         // Обновление баланса пользователя
         function updateUserBalance(amount) {
-            const balanceElement = document.getElementById('user-balance');
-            let currentBalance = parseFloat(balanceElement.textContent.split(' ')[0]);
+            let currentBalance = parseFloat(userBalance);
             currentBalance += amount;
-            balanceElement.textContent = `${currentBalance.toFixed(2)} TON`;
+            if (currentBalance < 0) currentBalance = 0;
+            
+            userBalance = currentBalance.toFixed(2);
+            localStorage.setItem('userBalance', userBalance);
+            document.getElementById('user-balance').textContent = `${userBalance} ${selectedCurrency}`;
         }
 
         // Настройка обработчиков событий
@@ -721,8 +829,6 @@
                 return;
             }
 
-            // В реальном приложении здесь будет запрос к API
-            // Для демонстрации просто покажем все NFT с ценой меньше или равной введенной
             document.getElementById('collections-section').style.display = 'none';
             document.getElementById('nfts-section').style.display = 'block';
             document.getElementById('collection-title').textContent = `NFT до ${price} TON`;
@@ -741,17 +847,24 @@
                         nftCard.className = 'nft-card';
                         const isFavorite = favorites.includes(nft.id);
                         const animationClass = nft.animated ? 'animated-nft' : '';
+                        const nftId = nft.name.split('#')[1] || nft.id;
                         
                         nftCard.innerHTML = `
                             <button class="favorite-button ${isFavorite ? 'active' : ''}" data-nft-id="${nft.id}">♥</button>
-                            <img src="${nft.image}" alt="${nft.name}" class="nft-image ${animationClass}">
+                            <img src="${nft.image}" alt="${nft.name}" class="nft-image ${animationClass}" onerror="this.src='https://via.placeholder.com/300x300/cccccc/666666?text=NFT+Image'">
                             <div class="nft-info">
                                 <div class="nft-name">${nft.name}</div>
                                 <div class="nft-price">${nft.price}</div>
+                                <div class="nft-id">#${nftId}</div>
                             </div>
                             <div class="chart-container">
-                                <img src="${getRandomChart().image}" class="chart-image" alt="График цен">
-                                <div class="chart-info">${getRandomChart().info}</div>
+                                <div class="chart-image">
+                                    📊 График цен
+                                </div>
+                                <div class="chart-info">
+                                    ${generateChartInfo(nft.id)}
+                                </div>
+                                ${generatePriceHistory(nft.id)}
                             </div>
                         `;
                         
@@ -786,7 +899,6 @@
             }
 
             userNFTs.forEach(nftId => {
-                // Найти NFT по ID
                 let nft = null;
                 for (const collection of Object.values(nfts)) {
                     nft = collection.find(item => item.id === nftId);
@@ -797,12 +909,14 @@
                     const nftCard = document.createElement('div');
                     nftCard.className = 'nft-card';
                     const animationClass = nft.animated ? 'animated-nft' : '';
+                    const nftIdNum = nft.name.split('#')[1] || nft.id;
                     
                     nftCard.innerHTML = `
-                        <img src="${nft.image}" alt="${nft.name}" class="nft-image ${animationClass}">
+                        <img src="${nft.image}" alt="${nft.name}" class="nft-image ${animationClass}" onerror="this.src='https://via.placeholder.com/300x300/cccccc/666666?text=NFT+Image'">
                         <div class="nft-info">
                             <div class="nft-name">${nft.name}</div>
                             <div class="nft-price">В вашей коллекции</div>
+                            <div class="nft-id">#${nftIdNum}</div>
                         </div>
                     `;
                     userNftGrid.appendChild(nftCard);
@@ -824,7 +938,6 @@
             }
 
             favorites.forEach(nftId => {
-                // Найти NFT по ID
                 let nft = null;
                 for (const collection of Object.values(nfts)) {
                     nft = collection.find(item => item.id === nftId);
@@ -836,17 +949,24 @@
                     nftCard.className = 'nft-card';
                     const isFavorite = favorites.includes(nft.id);
                     const animationClass = nft.animated ? 'animated-nft' : '';
+                    const nftIdNum = nft.name.split('#')[1] || nft.id;
                     
                     nftCard.innerHTML = `
                         <button class="favorite-button ${isFavorite ? 'active' : ''}" data-nft-id="${nft.id}">♥</button>
-                        <img src="${nft.image}" alt="${nft.name}" class="nft-image ${animationClass}">
+                        <img src="${nft.image}" alt="${nft.name}" class="nft-image ${animationClass}" onerror="this.src='https://via.placeholder.com/300x300/cccccc/666666?text=NFT+Image'">
                         <div class="nft-info">
                             <div class="nft-name">${nft.name}</div>
                             <div class="nft-price">${nft.price}</div>
+                            <div class="nft-id">#${nftIdNum}</div>
                         </div>
                         <div class="chart-container">
-                            <img src="${getRandomChart().image}" class="chart-image" alt="График цен">
-                            <div class="chart-info">${getRandomChart().info}</div>
+                            <div class="chart-image">
+                                📊 График цен
+                            </div>
+                            <div class="chart-info">
+                                ${generateChartInfo(nft.id)}
+                            </div>
+                            ${generatePriceHistory(nft.id)}
                         </div>
                     `;
                     
@@ -854,7 +974,6 @@
                         e.stopPropagation();
                         toggleFavorite(nft.id);
                         e.target.classList.toggle('active');
-                        // Обновить список избранного после удаления
                         if (!favorites.includes(nft.id)) {
                             showFavorites();
                         }
@@ -868,13 +987,7 @@
 
         // Обновление отображения валюты
         function updateCurrencyDisplay() {
-            // В реальном приложении здесь будет конвертация цен
-            document.querySelectorAll('.nft-price, .collection-stats').forEach(element => {
-                const text = element.textContent;
-                if (text.includes('TON')) {
-                    element.textContent = text.replace('TON', selectedCurrency);
-                }
-            });
+            document.getElementById('user-balance').textContent = `${userBalance} ${selectedCurrency}`;
         }
     </script>
 </body>
