@@ -1,1 +1,881 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFTrade - Telegram NFT Marketplace</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --primary-color: #0088cc;
+            --secondary-color: #6f42c1;
+            --bg-color: #f5f5f5;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            padding: 0 15px;
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .tabs {
+            display: flex;
+            background-color: white;
+            border-bottom: 1px solid #e0e0e0;
+            position: sticky;
+            top: 60px;
+            z-index: 99;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+            animation: fadeIn 0.5s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .search-bar {
+            margin: 15px 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+        }
+
+        .search-bar button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 0 20px;
+            cursor: pointer;
+        }
+
+        .collections-grid, .nft-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .collection-card, .nft-card {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s;
+        }
+
+        .collection-card:hover, .nft-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .collection-image, .nft-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .collection-info, .nft-info {
+            padding: 15px;
+        }
+
+        .collection-name, .nft-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .collection-stats, .nft-price {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .user-info {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-label {
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: var(--primary-color);
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .action-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .action-button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .verification {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .verification-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .verified {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .not-verified {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .settings-option {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .currency-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .currency-option {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .currency-option.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .info-content {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .info-section {
+            margin-bottom: 20px;
+        }
+
+        .info-section h3 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .chart-container {
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-top: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-image {
+            width: 100%;
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+        }
+
+        .chart-info {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .favorite-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .favorite-button.active {
+            color: #f44336;
+        }
+
+        .nft-card {
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .animated-nft {
+            animation: pulse 3s infinite;
+        }
+
+        @media (min-width: 768px) {
+            .collections-grid, .nft-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .collections-grid, .nft-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>NFTrade</h1>
+            <p>Торговая площадка NFT в Telegram</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="nft">NFT</div>
+            <div class="tab" data-tab="profile">Личный кабинет</div>
+            <div class="tab" data-tab="settings">Настройки</div>
+            <div class="tab" data-tab="info">Информация</div>
+        </div>
+
+        <!-- Вкладка NFT -->
+        <div class="tab-content active" id="nft-tab">
+            <div class="search-bar">
+                <input type="text" id="price-search" placeholder="Поиск по цене (в TON)">
+                <button id="search-button">Найти</button>
+            </div>
+
+            <div id="collections-section">
+                <h2>Коллекции NFT</h2>
+                <div class="collections-grid" id="collections-grid">
+                    <!-- Коллекции будут добавлены через JavaScript -->
+                </div>
+            </div>
+
+            <div id="nfts-section" style="display: none;">
+                <button id="back-to-collections" style="margin-bottom: 15px; padding: 10px; background: #ddd; border: none; border-radius: var(--border-radius); cursor: pointer;">← Назад к коллекциям</button>
+                <h2 id="collection-title">NFT коллекции</h2>
+                <div class="nft-grid" id="nft-grid">
+                    <!-- NFT будут добавлены через JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка Личный кабинет -->
+        <div class="tab-content" id="profile-tab">
+            <div class="user-info">
+                <div class="info-row">
+                    <span class="info-label">ID пользователя:</span>
+                    <span class="info-value" id="user-id">123456789</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Баланс:</span>
+                    <span class="info-value" id="user-balance">0 TON</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Деньги на выводе:</span>
+                    <span class="info-value" id="user-withdraw">0 TON</span>
+                </div>
+                <div class="verification">
+                    <span class="info-label">Верификация:</span>
+                    <span class="verification-status not-verified" id="verification-status">Не верифицирован</span>
+                    <button class="action-button" style="padding: 5px 10px; font-size: 12px;">Пройти</button>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-button" id="deposit-button">Пополнить</button>
+                <button class="action-button" id="withdraw-button">Вывести</button>
+                <button class="action-button" id="my-nft-button">Мои NFT</button>
+                <button class="action-button" id="favorites-button">Избранное</button>
+            </div>
+
+            <div id="user-nfts" style="display: none;">
+                <h2>Мои NFT</h2>
+                <div class="nft-grid" id="user-nft-grid">
+                    <!-- NFT пользователя будут добавлены через JavaScript -->
+                </div>
+            </div>
+
+            <div id="user-favorites" style="display: none;">
+                <h2>Избранное</h2>
+                <div class="nft-grid" id="favorites-grid">
+                    <!-- Избранные NFT будут добавлены через JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка Настройки -->
+        <div class="tab-content" id="settings-tab">
+            <div class="settings-option">
+                <span>Валюта</span>
+                <div class="currency-options">
+                    <div class="currency-option active" data-currency="TON">TON</div>
+                    <div class="currency-option" data-currency="KZT">KZT</div>
+                    <div class="currency-option" data-currency="RUB">RUB</div>
+                    <div class="currency-option" data-currency="$">$</div>
+                    <div class="currency-option" data-currency="EURO">EURO</div>
+                    <div class="currency-option" data-currency="UAH">UAH</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка Информация -->
+        <div class="tab-content" id="info-tab">
+            <div class="info-content">
+                <div class="info-section">
+                    <h3>О приложении</h3>
+                    <p>NFTrade - это торговая площадка для NFT в сети TON (Telegram Open Network). Покупайте, продавайте и торгуйте уникальными цифровыми активами прямо в Telegram.</p>
+                </div>
+                <div class="info-section">
+                    <h3>Поддержка</h3>
+                    <p>Если у вас возникли вопросы или проблемы, свяжитесь с нашей службой поддержки:</p>
+                    <p>Email: support@nftrade.com</p>
+                    <p>Telegram: @nftrade_support</p>
+                </div>
+                <div class="info-section">
+                    <h3>Правила использования</h3>
+                    <p>Все транзакции являются окончательными. Пожалуйста, проверяйте детали NFT перед покупкой. Платформа взимает комиссию в размере 2.5% от каждой сделки.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация Telegram Web App
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.enableClosingConfirmation();
+
+        // Данные приложения
+        const collections = [
+            {
+                id: 1,
+                name: "Plush Pepe",
+                image: "https://via.placeholder.com/300x200/6f42c1/ffffff?text=Plush+Pepe",
+                nftCount: 15,
+                floorPrice: "4.5 TON"
+            },
+            {
+                id: 2,
+                name: "Snoop Dogg",
+                image: "https://via.placeholder.com/300x200/4CAF50/ffffff?text=Snoop+Dogg",
+                nftCount: 8,
+                floorPrice: "7.2 TON"
+            },
+            {
+                id: 3,
+                name: "Telegram Gifts",
+                image: "https://via.placeholder.com/300x200/2196F3/ffffff?text=Telegram+Gifts",
+                nftCount: 12,
+                floorPrice: "3.8 TON"
+            },
+            {
+                id: 4,
+                name: "CryptoPunks TON",
+                image: "https://via.placeholder.com/300x200/FF9800/ffffff?text=CryptoPunks+TON",
+                nftCount: 20,
+                floorPrice: "12.5 TON"
+            },
+            {
+                id: 5,
+                name: "TON Animals",
+                image: "https://via.placeholder.com/300x200/E91E63/ffffff?text=TON+Animals",
+                nftCount: 10,
+                floorPrice: "2.3 TON"
+            },
+            {
+                id: 6,
+                name: "Digital Art TON",
+                image: "https://via.placeholder.com/300x200/009688/ffffff?text=Digital+Art+TON",
+                nftCount: 18,
+                floorPrice: "5.7 TON"
+            }
+        ];
+
+        const nfts = {
+            1: [
+                { id: 101, name: "Pepe #1", image: "https://via.placeholder.com/300x300/6f42c1/ffffff?text=Pepe+1", price: "4.5 TON", animated: true },
+                { id: 102, name: "Pepe #2", image: "https://via.placeholder.com/300x300/6f42c1/ffffff?text=Pepe+2", price: "5.2 TON", animated: true },
+                { id: 103, name: "Pepe #3", image: "https://via.placeholder.com/300x300/6f42c1/ffffff?text=Pepe+3", price: "3.8 TON", animated: true },
+                { id: 104, name: "Pepe #4", image: "https://via.placeholder.com/300x300/6f42c1/ffffff?text=Pepe+4", price: "6.1 TON", animated: true }
+            ],
+            2: [
+                { id: 201, name: "Snoop #1", image: "https://via.placeholder.com/300x300/4CAF50/ffffff?text=Snoop+1", price: "7.2 TON", animated: true },
+                { id: 202, name: "Snoop #2", image: "https://via.placeholder.com/300x300/4CAF50/ffffff?text=Snoop+2", price: "8.5 TON", animated: true },
+                { id: 203, name: "Snoop #3", image: "https://via.placeholder.com/300x300/4CAF50/ffffff?text=Snoop+3", price: "6.9 TON", animated: true }
+            ],
+            3: [
+                { id: 301, name: "Gift #1", image: "https://via.placeholder.com/300x300/2196F3/ffffff?text=Gift+1", price: "3.8 TON", animated: true },
+                { id: 302, name: "Gift #2", image: "https://via.placeholder.com/300x300/2196F3/ffffff?text=Gift+2", price: "4.2 TON", animated: true },
+                { id: 303, name: "Gift #3", image: "https://via.placeholder.com/300x300/2196F3/ffffff?text=Gift+3", price: "2.9 TON", animated: true },
+                { id: 304, name: "Gift #4", image: "https://via.placeholder.com/300x300/2196F3/ffffff?text=Gift+4", price: "5.1 TON", animated: true }
+            ],
+            4: [
+                { id: 401, name: "Punk #1", image: "https://via.placeholder.com/300x300/FF9800/ffffff?text=Punk+1", price: "12.5 TON", animated: true },
+                { id: 402, name: "Punk #2", image: "https://via.placeholder.com/300x300/FF9800/ffffff?text=Punk+2", price: "15.3 TON", animated: true },
+                { id: 403, name: "Punk #3", image: "https://via.placeholder.com/300x300/FF9800/ffffff?text=Punk+3", price: "10.8 TON", animated: true }
+            ],
+            5: [
+                { id: 501, name: "Animal #1", image: "https://via.placeholder.com/300x300/E91E63/ffffff?text=Animal+1", price: "2.3 TON", animated: true },
+                { id: 502, name: "Animal #2", image: "https://via.placeholder.com/300x300/E91E63/ffffff?text=Animal+2", price: "3.1 TON", animated: true },
+                { id: 503, name: "Animal #3", image: "https://via.placeholder.com/300x300/E91E63/ffffff?text=Animal+3", price: "1.9 TON", animated: true }
+            ],
+            6: [
+                { id: 601, name: "Art #1", image: "https://via.placeholder.com/300x300/009688/ffffff?text=Art+1", price: "5.7 TON", animated: true },
+                { id: 602, name: "Art #2", image: "https://via.placeholder.com/300x300/009688/ffffff?text=Art+2", price: "7.4 TON", animated: true },
+                { id: 603, name: "Art #3", image: "https://via.placeholder.com/300x300/009688/ffffff?text=Art+3", price: "4.9 TON", animated: true }
+            ]
+        };
+
+        // Графики для NFT (выдуманные данные)
+        const charts = [
+            { image: "https://via.placeholder.com/300x150/6f42c1/ffffff?text=Chart+1", info: "Цена выросла на 15% за последние 7 дней" },
+            { image: "https://via.placeholder.com/300x150/4CAF50/ffffff?text=Chart+2", info: "Стабильный рост на 5% ежедневно" },
+            { image: "https://via.placeholder.com/300x150/2196F3/ffffff?text=Chart+3", info: "Волатильность высокая, возможен скачок цены" },
+            { image: "https://via.placeholder.com/300x150/FF9800/ffffff?text=Chart+4", info: "Цена упала на 8%, но ожидается восстановление" },
+            { image: "https://via.placeholder.com/300x150/E91E63/ffffff?text=Chart+5", info: "Стабильная цена в течение месяца" },
+            { image: "https://via.placeholder.com/300x150/009688/ffffff?text=Chart+6", info: "Резкий рост на 25% после листинга на новой площадке" }
+        ];
+
+        // Состояние приложения
+        let currentCollection = null;
+        let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+        let userNFTs = JSON.parse(localStorage.getItem('userNFTs')) || [];
+        let selectedCurrency = localStorage.getItem('currency') || 'TON';
+
+        // Инициализация приложения
+        document.addEventListener('DOMContentLoaded', function() {
+            renderCollections();
+            setupEventListeners();
+            updateCurrencyDisplay();
+        });
+
+        // Рендер коллекций
+        function renderCollections() {
+            const collectionsGrid = document.getElementById('collections-grid');
+            collectionsGrid.innerHTML = '';
+
+            collections.forEach(collection => {
+                const collectionCard = document.createElement('div');
+                collectionCard.className = 'collection-card';
+                collectionCard.innerHTML = `
+                    <img src="${collection.image}" alt="${collection.name}" class="collection-image">
+                    <div class="collection-info">
+                        <div class="collection-name">${collection.name}</div>
+                        <div class="collection-stats">${collection.nftCount} NFT • от ${collection.floorPrice}</div>
+                    </div>
+                `;
+                collectionCard.addEventListener('click', () => showCollectionNFTs(collection.id));
+                collectionsGrid.appendChild(collectionCard);
+            });
+        }
+
+        // Показать NFT коллекции
+        function showCollectionNFTs(collectionId) {
+            currentCollection = collectionId;
+            const collection = collections.find(c => c.id === collectionId);
+            
+            document.getElementById('collections-section').style.display = 'none';
+            document.getElementById('nfts-section').style.display = 'block';
+            document.getElementById('collection-title').textContent = collection.name;
+
+            const nftGrid = document.getElementById('nft-grid');
+            nftGrid.innerHTML = '';
+
+            nfts[collectionId].forEach(nft => {
+                const nftCard = document.createElement('div');
+                nftCard.className = 'nft-card';
+                const isFavorite = favorites.includes(nft.id);
+                const animationClass = nft.animated ? 'animated-nft' : '';
+                
+                nftCard.innerHTML = `
+                    <button class="favorite-button ${isFavorite ? 'active' : ''}" data-nft-id="${nft.id}">♥</button>
+                    <img src="${nft.image}" alt="${nft.name}" class="nft-image ${animationClass}">
+                    <div class="nft-info">
+                        <div class="nft-name">${nft.name}</div>
+                        <div class="nft-price">${nft.price}</div>
+                    </div>
+                    <div class="chart-container">
+                        <img src="${getRandomChart().image}" class="chart-image" alt="График цен">
+                        <div class="chart-info">${getRandomChart().info}</div>
+                    </div>
+                `;
+                
+                nftCard.querySelector('.favorite-button').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleFavorite(nft.id);
+                    e.target.classList.toggle('active');
+                });
+                
+                nftCard.addEventListener('click', () => showNFTDetails(nft));
+                nftGrid.appendChild(nftCard);
+            });
+        }
+
+        // Получить случайный график
+        function getRandomChart() {
+            return charts[Math.floor(Math.random() * charts.length)];
+        }
+
+        // Переключение избранного
+        function toggleFavorite(nftId) {
+            const index = favorites.indexOf(nftId);
+            if (index > -1) {
+                favorites.splice(index, 1);
+            } else {
+                favorites.push(nftId);
+            }
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+        }
+
+        // Показать детали NFT (в реальном приложении здесь будет модальное окно)
+        function showNFTDetails(nft) {
+            alert(`Детали NFT: ${nft.name}\nЦена: ${nft.price}\n\nВ реальном приложении здесь будет подробная информация о NFT и возможность покупки.`);
+            
+            // В реальном приложении здесь будет логика покупки NFT
+            // Для демонстрации просто добавим NFT в коллекцию пользователя
+            if (!userNFTs.includes(nft.id)) {
+                userNFTs.push(nft.id);
+                localStorage.setItem('userNFTs', JSON.stringify(userNFTs));
+                updateUserBalance(parseFloat(nft.price.split(' ')[0]) * -1);
+            }
+        }
+
+        // Обновление баланса пользователя
+        function updateUserBalance(amount) {
+            const balanceElement = document.getElementById('user-balance');
+            let currentBalance = parseFloat(balanceElement.textContent.split(' ')[0]);
+            currentBalance += amount;
+            balanceElement.textContent = `${currentBalance.toFixed(2)} TON`;
+        }
+
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Переключение вкладок
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+                    
+                    // Скрыть разделы в личном кабинете при переключении вкладок
+                    if (tab.dataset.tab !== 'profile') {
+                        document.getElementById('user-nfts').style.display = 'none';
+                        document.getElementById('user-favorites').style.display = 'none';
+                    }
+                });
+            });
+
+            // Кнопка "Назад к коллекциям"
+            document.getElementById('back-to-collections').addEventListener('click', () => {
+                document.getElementById('collections-section').style.display = 'block';
+                document.getElementById('nfts-section').style.display = 'none';
+            });
+
+            // Поиск по цене
+            document.getElementById('search-button').addEventListener('click', searchByPrice);
+            document.getElementById('price-search').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchByPrice();
+            });
+
+            // Кнопки в личном кабинете
+            document.getElementById('deposit-button').addEventListener('click', () => {
+                alert('В реальном приложении здесь будет открыт интерфейс пополнения баланса.');
+                updateUserBalance(10); // Для демонстрации
+            });
+
+            document.getElementById('withdraw-button').addEventListener('click', () => {
+                alert('В реальном приложении здесь будет открыт интерфейс вывода средств.');
+            });
+
+            document.getElementById('my-nft-button').addEventListener('click', showUserNFTs);
+            document.getElementById('favorites-button').addEventListener('click', showFavorites);
+
+            // Выбор валюты
+            document.querySelectorAll('.currency-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.currency-option').forEach(o => o.classList.remove('active'));
+                    option.classList.add('active');
+                    selectedCurrency = option.dataset.currency;
+                    localStorage.setItem('currency', selectedCurrency);
+                    updateCurrencyDisplay();
+                });
+            });
+        }
+
+        // Поиск по цене
+        function searchByPrice() {
+            const priceInput = document.getElementById('price-search').value;
+            if (!priceInput) return;
+
+            const price = parseFloat(priceInput);
+            if (isNaN(price)) {
+                alert('Пожалуйста, введите корректную цену');
+                return;
+            }
+
+            // В реальном приложении здесь будет запрос к API
+            // Для демонстрации просто покажем все NFT с ценой меньше или равной введенной
+            document.getElementById('collections-section').style.display = 'none';
+            document.getElementById('nfts-section').style.display = 'block';
+            document.getElementById('collection-title').textContent = `NFT до ${price} TON`;
+
+            const nftGrid = document.getElementById('nft-grid');
+            nftGrid.innerHTML = '';
+
+            let foundNFTs = false;
+
+            Object.values(nfts).forEach(collectionNFTs => {
+                collectionNFTs.forEach(nft => {
+                    const nftPrice = parseFloat(nft.price.split(' ')[0]);
+                    if (nftPrice <= price) {
+                        foundNFTs = true;
+                        const nftCard = document.createElement('div');
+                        nftCard.className = 'nft-card';
+                        const isFavorite = favorites.includes(nft.id);
+                        const animationClass = nft.animated ? 'animated-nft' : '';
+                        
+                        nftCard.innerHTML = `
+                            <button class="favorite-button ${isFavorite ? 'active' : ''}" data-nft-id="${nft.id}">♥</button>
+                            <img src="${nft.image}" alt="${nft.name}" class="nft-image ${animationClass}">
+                            <div class="nft-info">
+                                <div class="nft-name">${nft.name}</div>
+                                <div class="nft-price">${nft.price}</div>
+                            </div>
+                            <div class="chart-container">
+                                <img src="${getRandomChart().image}" class="chart-image" alt="График цен">
+                                <div class="chart-info">${getRandomChart().info}</div>
+                            </div>
+                        `;
+                        
+                        nftCard.querySelector('.favorite-button').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            toggleFavorite(nft.id);
+                            e.target.classList.toggle('active');
+                        });
+                        
+                        nftCard.addEventListener('click', () => showNFTDetails(nft));
+                        nftGrid.appendChild(nftCard);
+                    }
+                });
+            });
+
+            if (!foundNFTs) {
+                nftGrid.innerHTML = '<p>NFT с указанной ценой не найдены</p>';
+            }
+        }
+
+        // Показать NFT пользователя
+        function showUserNFTs() {
+            document.getElementById('user-nfts').style.display = 'block';
+            document.getElementById('user-favorites').style.display = 'none';
+
+            const userNftGrid = document.getElementById('user-nft-grid');
+            userNftGrid.innerHTML = '';
+
+            if (userNFTs.length === 0) {
+                userNftGrid.innerHTML = '<p>У вас пока нет NFT</p>';
+                return;
+            }
+
+            userNFTs.forEach(nftId => {
+                // Найти NFT по ID
+                let nft = null;
+                for (const collection of Object.values(nfts)) {
+                    nft = collection.find(item => item.id === nftId);
+                    if (nft) break;
+                }
+
+                if (nft) {
+                    const nftCard = document.createElement('div');
+                    nftCard.className = 'nft-card';
+                    const animationClass = nft.animated ? 'animated-nft' : '';
+                    
+                    nftCard.innerHTML = `
+                        <img src="${nft.image}" alt="${nft.name}" class="nft-image ${animationClass}">
+                        <div class="nft-info">
+                            <div class="nft-name">${nft.name}</div>
+                            <div class="nft-price">В вашей коллекции</div>
+                        </div>
+                    `;
+                    userNftGrid.appendChild(nftCard);
+                }
+            });
+        }
+
+        // Показать избранное
+        function showFavorites() {
+            document.getElementById('user-nfts').style.display = 'none';
+            document.getElementById('user-favorites').style.display = 'block';
+
+            const favoritesGrid = document.getElementById('favorites-grid');
+            favoritesGrid.innerHTML = '';
+
+            if (favorites.length === 0) {
+                favoritesGrid.innerHTML = '<p>У вас пока нет избранных NFT</p>';
+                return;
+            }
+
+            favorites.forEach(nftId => {
+                // Найти NFT по ID
+                let nft = null;
+                for (const collection of Object.values(nfts)) {
+                    nft = collection.find(item => item.id === nftId);
+                    if (nft) break;
+                }
+
+                if (nft) {
+                    const nftCard = document.createElement('div');
+                    nftCard.className = 'nft-card';
+                    const isFavorite = favorites.includes(nft.id);
+                    const animationClass = nft.animated ? 'animated-nft' : '';
+                    
+                    nftCard.innerHTML = `
+                        <button class="favorite-button ${isFavorite ? 'active' : ''}" data-nft-id="${nft.id}">♥</button>
+                        <img src="${nft.image}" alt="${nft.name}" class="nft-image ${animationClass}">
+                        <div class="nft-info">
+                            <div class="nft-name">${nft.name}</div>
+                            <div class="nft-price">${nft.price}</div>
+                        </div>
+                        <div class="chart-container">
+                            <img src="${getRandomChart().image}" class="chart-image" alt="График цен">
+                            <div class="chart-info">${getRandomChart().info}</div>
+                        </div>
+                    `;
+                    
+                    nftCard.querySelector('.favorite-button').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleFavorite(nft.id);
+                        e.target.classList.toggle('active');
+                        // Обновить список избранного после удаления
+                        if (!favorites.includes(nft.id)) {
+                            showFavorites();
+                        }
+                    });
+                    
+                    nftCard.addEventListener('click', () => showNFTDetails(nft));
+                    favoritesGrid.appendChild(nftCard);
+                }
+            });
+        }
+
+        // Обновление отображения валюты
+        function updateCurrencyDisplay() {
+            // В реальном приложении здесь будет конвертация цен
+            document.querySelectorAll('.nft-price, .collection-stats').forEach(element => {
+                const text = element.textContent;
+                if (text.includes('TON')) {
+                    element.textContent = text.replace('TON', selectedCurrency);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
